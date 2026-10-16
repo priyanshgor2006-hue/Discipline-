@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07070b">
+<title>IRON DAILY — Discipline Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070b;
+  --card:rgba(255,255,255,.045);
+  --card-hi:rgba(255,255,255,.08);
+  --line:rgba(255,255,255,.09);
+  --text:#f3f1ea;
+  --muted:#9a98a6;
+  --gold:#f5c451;
+  --gold2:#ff8a3d;
+  --violet:#7c5cff;
+  --green:#3ddc97;
+  --red:#ff5d6c;
+  --grad:linear-gradient(135deg,#ffe08a 0%,#f5c451 35%,#ff8a3d 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.5;
+  background-image:
+    radial-gradient(900px 500px at 85% -10%,rgba(124,92,255,.22),transparent 60%),
+    radial-gradient(800px 500px at -10% 10%,rgba(245,196,81,.14),transparent 60%),
+    radial-gradient(700px 600px at 50% 120%,rgba(255,138,61,.10),transparent 60%);
+  background-attachment:fixed;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 16px 60px}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.brand{font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.14em;font-size:1.5rem;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 14px rgba(245,196,81,.35))}
+.brand small{display:block;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.2em;font-size:.62rem;color:var(--muted);-webkit-text-fill-color:var(--muted)}
+.datenav{display:flex;align-items:center;gap:8px}
+.datenav .date{min-width:150px;text-align:center;font-weight:600}
+.datenav .date span{display:block;font-size:.72rem;color:var(--muted);font-weight:500}
+
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
+.icon-btn{width:38px;height:38px;border-radius:12px;background:var(--card);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:1rem;transition:.2s}
+.icon-btn:hover:not(:disabled){background:var(--card-hi);box-shadow:0 0 18px rgba(245,196,81,.18)}
+.icon-btn:disabled{opacity:.3;cursor:not-allowed}
+.btn{padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:.88rem;transition:.2s}
+.btn:hover{background:var(--card-hi)}
+.btn.gold{background:var(--grad);color:#1a1205;border:none;box-shadow:0 6px 24px rgba(245,166,61,.35)}
+.btn.gold:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.danger{color:var(--red)}
+
+/* cards */
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:20px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+/* quote */
+.quote{padding:26px 24px;margin-bottom:18px;text-align:center;
+  background:linear-gradient(135deg,rgba(245,196,81,.10),rgba(124,92,255,.10)),var(--card)}
+.quote p{font-family:'Oswald',sans-serif;font-weight:500;font-size:clamp(1.15rem,3.2vw,1.65rem);letter-spacing:.02em;
+  line-height:1.35;transition:opacity .4s;text-shadow:0 0 24px rgba(245,196,81,.25)}
+.quote .tag{font-size:.65rem;letter-spacing:.3em;color:var(--gold);margin-bottom:10px;font-weight:600}
+.quote .next{margin-top:12px;font-size:.75rem;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+
+/* score */
+.score{padding:22px;display:flex;align-items:center;gap:22px;margin-bottom:18px}
+.ring{position:relative;width:128px;height:128px;flex:none}
+.ring svg{transform:rotate(-90deg);width:100%;height:100%;filter:drop-shadow(0 0 10px rgba(245,196,81,.45))}
+.ring .bg{stroke:rgba(255,255,255,.08)}
+.ring .fg{stroke:url(#g);stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)}
+.ring .pct{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:'Oswald',sans-serif;font-size:2rem;font-weight:700}
+.ring .pct small{display:block;font-family:'Inter';font-size:.62rem;color:var(--muted);letter-spacing:.2em;font-weight:500}
+.score h2{font-family:'Oswald',sans-serif;font-size:1.35rem;letter-spacing:.06em;font-weight:600}
+.score p{color:var(--muted);font-size:.9rem;margin-top:4px}
+.rank{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700;letter-spacing:.15em;
+  background:rgba(245,196,81,.12);border:1px solid rgba(245,196,81,.4);color:var(--gold)}
+.conquered{display:none;margin-top:8px;font-weight:700;letter-spacing:.2em;font-size:.75rem;color:var(--green)}
+.conquered.on{display:block}
+
+/* tasks */
+.tasks-head{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 12px;gap:8px;flex-wrap:wrap}
+.tasks-head h3{font-family:'Oswald',sans-serif;letter-spacing:.12em;font-weight:600;font-size:1.05rem}
+.task{position:relative;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:.25s}
+.task .emo{font-size:1.5rem;width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.05)}
+.task .info{flex:1;min-width:0}
+.task .name{font-weight:600;font-size:.98rem}
+.task .sub{font-size:.76rem;color:var(--muted)}
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--violet),var(--gold));transition:width .5s}
+.task.done{border-color:rgba(245,196,81,.55);background:linear-gradient(135deg,rgba(245,196,81,.12),rgba(255,138,61,.05)),var(--card);
+  box-shadow:0 0 26px rgba(245,196,81,.16)}
+.task.done .emo{background:rgba(245,196,81,.18)}
+.task.done .bar i{background:var(--grad)}
+.check{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.2);display:grid;place-items:center;font-size:1.2rem;transition:.2s;flex:none}
+.task.done .check{background:var(--grad);border-color:transparent;color:#1a1205;box-shadow:0 0 16px rgba(245,196,81,.5)}
+.counter{display:flex;align-items:center;gap:8px;flex:none}
+.counter .val{min-width:62px;text-align:center;font-family:'Oswald';font-size:1.1rem;font-weight:600}
+.counter .val small{font-family:'Inter';font-size:.68rem;color:var(--muted);font-weight:500}
+.counter button{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid var(--line);font-size:1.1rem;font-weight:700;transition:.15s}
+.counter button:hover{background:rgba(245,196,81,.2)}
+.counter button:active{transform:scale(.92)}
+.del{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:8px;background:rgba(255,93,108,.15);color:var(--red);font-size:.8rem;display:none}
+.managing .del{display:block}
+.managing .task{padding-right:40px}
+@media(max-width:520px){
+  .task{flex-wrap:wrap}
+  .counter{width:100%;justify-content:space-between;margin-top:4px}
+  .score{flex-direction:column;text-align:center}
+}
+
+/* stats */
+.side{display:flex;flex-direction:column;gap:18px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:16px}
+.stat{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.stat b{display:block;font-family:'Oswald';font-size:1.7rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{font-size:.7rem;letter-spacing:.14em;color:var(--muted);font-weight:600}
+.panel{padding:18px}
+.panel h4{font-family:'Oswald';letter-spacing:.12em;font-weight:600;font-size:.95rem;margin-bottom:12px}
+.panel h4 em{font-style:normal;font-family:'Inter';font-size:.7rem;color:var(--muted);letter-spacing:.04em;margin-left:6px;font-weight:500}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.heat div{aspect-ratio:1;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.04);cursor:pointer;transition:.15s}
+.heat div:hover{transform:scale(1.12)}
+.heat .sel{outline:2px solid var(--violet);outline-offset:1px}
+.heat .l1{background:rgba(245,196,81,.22)}
+.heat .l2{background:rgba(245,196,81,.45)}
+.heat .l3{background:rgba(245,166,61,.72)}
+.heat .l4{background:var(--grad);box-shadow:0 0 12px rgba(245,196,81,.5)}
+.legend{display:flex;gap:6px;align-items:center;font-size:.66rem;color:var(--muted);margin-top:10px}
+.legend i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.bars{display:flex;align-items:flex-end;gap:5px;height:120px}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px;cursor:pointer}
+.bars .b{width:100%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--gold),var(--violet));min-height:3px;opacity:.9;transition:height .5s}
+.bars .b.zero{background:rgba(255,255,255,.08)}
+.bars span{font-size:.58rem;color:var(--muted)}
+textarea{width:100%;min-height:84px;resize:vertical;padding:12px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:.92rem}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,196,81,.15)}
+.foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;justify-content:center}
+.note{text-align:center;color:var(--muted);font-size:.72rem;margin-top:14px}
+
+/* dialog */
+dialog{margin:auto;border:1px solid var(--line);border-radius:22px;background:#0f0f17;color:var(--text);padding:0;width:min(440px,92vw);
+  box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(124,92,255,.2)}
+dialog::backdrop{background:rgba(0,0,0,.7);backdrop-filter:blur(4px)}
+dialog form{padding:22px;display:flex;flex-direction:column;gap:12px}
+dialog h3{font-family:'Oswald';letter-spacing:.1em;font-size:1.2rem;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+label{font-size:.72rem;letter-spacing:.1em;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:5px}
+input,select{padding:11px 12px;border-radius:12px;background:rgba(0,0,0,.4);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:.95rem}
+select option{background:#14141d}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;background:#15151f;border:1px solid var(--gold);padding:10px 18px;border-radius:12px;font-size:.85rem;transition:.3s;pointer-events:none;z-index:50}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">IRON DAILY<small>BOY → MAN · ONE DAY AT A TIME</small></div>
+  <div class="datenav">
+    <button class="icon-btn" id="prev" aria-label="Previous day">‹</button>
+    <div class="date" id="dateLabel"></div>
+    <button class="icon-btn" id="next" aria-label="Next day">›</button>
+    <button class="btn" id="todayBtn">Today</button>
+  </div>
+</header>
+
+<section class="card quote">
+  <div class="tag">REMEMBER THIS</div>
+  <p id="quoteText"></p>
+  <button class="next" id="nextQuote">another one</button>
+</section>
+
+<div class="grid">
+  <main>
+    <section class="card score">
+      <div class="ring">
+        <svg viewBox="0 0 120 120">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".5" stop-color="#f5c451"/><stop offset="1" stop-color="#ff8a3d"/></linearGradient></defs>
+          <circle class="bg" cx="60" cy="60" r="52" fill="none" stroke-width="10"/>
+          <circle class="fg" id="ringFg" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+        </svg>
+        <div class="pct"><div><span id="pct">0%</span><small>TODAY</small></div></div>
+      </div>
+      <div>
+        <h2 id="scoreTitle"></h2>
+        <p id="scoreSub"></p>
+        <span class="rank" id="rank"></span>
+        <div class="conquered" id="conquered">★ DAY CONQUERED ★</div>
+      </div>
+    </section>
+
+    <div class="tasks-head">
+      <h3>DAILY MISSIONS</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="manageBtn">Edit list</button>
+        <button class="btn gold" id="addBtn">+ Add task</button>
+      </div>
+    </div>
+    <div id="tasks"></div>
+  </main>
+
+  <aside class="side">
+    <section class="card stats">
+      <div class="stat"><b id="sStreak">0</b><span>CURRENT STREAK</span></div>
+      <div class="stat"><b id="sBest">0</b><span>BEST STREAK</span></div>
+      <div class="stat"><b id="sAvg">0%</b><span>7-DAY AVERAGE</span></div>
+      <div class="stat"><b id="sDays">0</b><span>WINNING DAYS</span></div>
+    </section>
+
+    <section class="card panel">
+      <h4>LAST 14 DAYS <em>tap a bar to open that day</em></h4>
+      <div class="bars" id="bars"></div>
+    </section>
+
+    <section class="card panel">
+      <h4>LAST 35 DAYS <em>tap a square to edit that day</em></h4>
+      <div class="heat" id="heat"></div>
+      <div class="legend">Less <i style="background:rgba(255,255,255,.08)"></i><i style="background:rgba(245,196,81,.22)"></i><i style="background:rgba(245,196,81,.45)"></i><i style="background:rgba(245,166,61,.72)"></i><i style="background:#f5c451"></i> More · a winning day = 80%+</div>
+    </section>
+
+    <section class="card panel">
+      <h4>MY WHY</h4>
+      <textarea id="why" placeholder="Why are you doing this? Write it down. Read it when you feel lazy."></textarea>
+    </section>
+  </aside>
+</div>
+
+<div class="foot">
+  <button class="btn" id="export">Download backup</button>
+  <button class="btn" id="import">Restore backup</button>
+  <button class="btn danger" id="reset">Reset everything</button>
+  <input type="file" id="file" accept="application/json" hidden>
+</div>
+<p class="note">Your data is saved in this browser only. Download a backup now and then.</p>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <h3>NEW MISSION</h3>
+    <div class="row">
+      <label style="flex:0 0 80px">ICON<input id="fEmoji" maxlength="2" value="🔥"></label>
+      <label>TASK NAME<input id="fName" placeholder="e.g. Cold shower" required maxlength="40"></label>
+    </div>
+    <label>HOW TO TRACK
+      <select id="fType"><option value="check">Done / Not done</option><option value="count">Amount (hours, litres, pages…)</option></select>
+    </label>
+    <div class="row" id="countFields" style="display:none">
+      <label>DAILY TARGET<input id="fTarget" type="number" min="0.1" step="any" value="1"></label>
+      <label>UNIT<input id="fUnit" placeholder="hrs / L / pages" value="hrs" maxlength="10"></label>
+      <label>STEP (+/−)<input id="fStep" type="number" min="0.05" step="any" value="1"></label>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="cancel">Cancel</button>
+      <button type="submit" class="btn gold">Add</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='ironDaily.v1';
+const WIN=0.8;
+const QUOTES=[
+  "You could be someone. All you have to do is work these next few years.",
+  "Discipline is choosing what you want most over what you want right now.",
+  "Nobody is coming to save you. Get up and do the work.",
+  "Your future self is watching what you do today.",
+  "Comfort is the price you pay for an average life.",
+  "Motivation fades. Discipline stays.",
+  "Be the man your younger self needed.",
+  "Strong men are built in silence, by daily work.",
+  "Don't negotiate with the alarm clock.",
+  "One more page. One more rep. One more day.",
+  "Small wins done daily beat big plans done never.",
+  "You don't rise to your goals. You fall to your habits.",
+  "Today's effort is tomorrow's respect.",
+  "Boys wait to feel like it. Men do it anyway.",
+  "Skip today and you teach yourself to skip tomorrow.",
+  "The pain of discipline is lighter than the pain of regret."
+];
+const RANKS=[[0,'BOY'],[3,'APPRENTICE'],[7,'DISCIPLINED'],[21,'WARRIOR'],[45,'IRON WILL'],[90,'MAN']];
+
+const DEFAULT_TASKS=[
+  {id:'sleep',name:'Sleep 6–7 hours',emoji:'😴',type:'count',target:6,unit:'hrs',step:0.5},
+  {id:'water',name:'Drink 3 litres of water',emoji:'💧',type:'count',target:3,unit:'L',step:0.25},
+  {id:'study',name:'Study 2+ hours',emoji:'📚',type:'count',target:2,unit:'hrs',step:0.5},
+  {id:'workout',name:'Workout / exercise',emoji:'💪',type:'check'},
+  {id:'build',name:'Build my product',emoji:'🚀',type:'count',target:1,unit:'hrs',step:0.5},
+  {id:'read',name:'Read 10 pages',emoji:'📖',type:'check'},
+  {id:'junk',name:'No junk food or sugar',emoji:'🥗',type:'check'},
+  {id:'scroll',name:'No porn, no doomscrolling',emoji:'📵',type:'check'},
+  {id:'calm',name:'Meditate 10 minutes',emoji:'🧘',type:'check'},
+  {id:'plan',name:"Plan tomorrow tonight",emoji:'📝',type:'check'}
+].map(t=>({...t,added:'2000-01-01'}));
+
+const pad=n=>String(n).padStart(2,'0');
+const dkey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayKey=()=>dkey(new Date());
+const parse=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(k,n)=>{const d=parse(k);d.setDate(d.getDate()+n);return dkey(d)};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>(Math.round(n*100)/100).toString();
+const $=s=>document.querySelector(s);
+
+let S=load();
+let sel=todayKey();
+let managing=false;
+let qi=Math.floor(Math.random()*QUOTES.length);
+
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){const o=JSON.parse(raw);if(o&&o.tasks&&o.days)return o}
+  }catch(e){}
+  return {tasks:DEFAULT_TASKS.map(t=>({...t})),days:{},why:''};
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save — storage blocked')}}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* scoring */
+const frac=(t,v)=>t.type==='check'?(v?1:0):Math.min((Number(v)||0)/t.target,1);
+const activeTasks=k=>S.tasks.filter(t=>t.added<=k);
+function score(k){
+  if(!S.days[k])return null;
+  const ts=activeTasks(k);if(!ts.length)return null;
+  const d=S.days[k];
+  return ts.reduce((a,t)=>a+frac(t,d[t.id]),0)/ts.length;
+}
+const isWin=k=>{const s=score(k);return s!==null&&s>=WIN};
+function streaks(){
+  let cur=0,k=todayKey();
+  if(!isWin(k))k=addDays(k,-1);
+  while(isWin(k)){cur++;k=addDays(k,-1)}
+  const keys=Object.keys(S.days).sort();
+  let best=0,run=0,prev=null;
+  for(const key of keys){
+    if(isWin(key)){run=(prev&&addDays(prev,1)===key)?run+1:1;prev=key;best=Math.max(best,run)}
+    else{run=0;prev=null}
+  }
+  return {cur,best,wins:keys.filter(isWin).length};
+}
+
+/* actions */
+function setVal(id,v){
+  if(!S.days[sel])S.days[sel]={};
+  S.days[sel][id]=v;
+  save();render();
+}
+function toggle(id){
+  const v=(S.days[sel]||{})[id];
+  setVal(id,!v);
+}
+function bump(id,dir){
+  const t=S.tasks.find(x=>x.id===id);
+  const cur=Number((S.days[sel]||{})[id])||0;
+  const next=Math.max(0,Math.round((cur+dir*t.step)*1000)/1000);
+  setVal(id,next);
+}
+
+/* render */
+function render(){
+  renderDate();renderScore();renderTasks();renderStats();renderCharts();
+  $('#quoteText').textContent=QUOTES[qi];
+}
+function renderDate(){
+  const d=parse(sel),t=todayKey();
+  const rel=sel===t?'TODAY':sel===addDays(t,-1)?'YESTERDAY':'';
+  $('#dateLabel').innerHTML=`${d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})}<span>${rel||d.getFullYear()}</span>`;
+  $('#next').disabled=sel>=t;
+  $('#todayBtn').style.display=sel===t?'none':'';
+}
+function renderScore(){
+  const s=score(sel)||0,p=Math.round(s*100);
+  $('#pct').textContent=p+'%';
+  $('#ringFg').style.strokeDashoffset=326.7*(1-s);
+  const done=activeTasks(sel).filter(t=>frac(t,(S.days[sel]||{})[t.id])>=1).length;
+  const total=activeTasks(sel).length;
+  const msgs=[[0,'Zero. Start now.','Nothing logged yet. One small win breaks the spell.'],
+    [0.01,'Weak. You can do better.','Don’t end the day like this.'],
+    [0.4,'Getting there.','Keep stacking. Don’t stop halfway.'],
+    [0.8,'Strong day.','You’re in the winning zone. Finish the rest.'],
+    [1,'Flawless. Respect.','Every mission done. This is who you’re becoming.']];
+  let m=msgs[0];for(const x of msgs)if(s>=x[0])m=x;
+  $('#scoreTitle').textContent=m[1];
+  $('#scoreSub').textContent=`${done} of ${total} missions complete. ${m[2]}`;
+  $('#conquered').classList.toggle('on',s>=1&&total>0);
+  const w=streaks().wins;let r=RANKS[0][1];
+  for(const [n,name] of RANKS)if(w>=n)r=name;
+  $('#rank').textContent='RANK: '+r;
+}
+function renderTasks(){
+  const day=S.days[sel]||{};
+  $('#tasks').className=managing?'managing':'';
+  const ts=activeTasks(sel);
+  if(!ts.length){$('#tasks').innerHTML='<div class="card panel" style="text-align:center;color:var(--muted)">No missions yet. Add your first one.</div>';return}
+  $('#tasks').innerHTML=ts.map(t=>{
+    const v=day[t.id],f=frac(t,v),done=f>=1;
+    const del=`<button class="del" data-del="${t.id}" aria-label="Delete task">✕</button>`;
+    if(t.type==='check'){
+      return `<div class="card task ${done?'done':''}" data-toggle="${t.id}" style="cursor:pointer">
+        <div class="emo">${esc(t.emoji)}</div>
+        <div class="info"><div class="name">${esc(t.name)}</div><div class="sub">${done?'Done':'Not done yet'}</div></div>
+        <div class="check">${done?'✓':''}</div>${del}</div>`;
+    }
+    return `<div class="card task ${done?'done':''}">
+      <div class="emo">${esc(t.emoji)}</div>
+      <div class="info"><div class="name">${esc(t.name)}</div>
+        <div class="sub">Target: ${fmt(t.target)} ${esc(t.unit)}</div>
+        <div class="bar"><i style="width:${f*100}%"></i></div></div>
+      <div class="counter"><button data-bump="${t.id}" data-dir="-1">−</button>
+        <div class="val">${fmt(Number(v)||0)} <small>${esc(t.unit)}</small></div>
+        <button data-bump="${t.id}" data-dir="1">+</button></div>${del}</div>`;
+  }).join('');
+}
+function renderStats(){
+  const s=streaks();
+  $('#sStreak').textContent=s.cur;$('#sBest').textContent=s.best;$('#sDays').textContent=s.wins;
+  let sum=0,n=0;
+  for(let i=0;i<7;i++){const v=score(addDays(todayKey(),-i));if(v!==null){sum+=v;n++}}
+  $('#sAvg').textContent=n?Math.round(sum/7*100)+'%':'0%';
+}
+function renderCharts(){
+  const t=todayKey();
+  $('#bars').innerHTML=Array.from({length:14},(_,i)=>{
+    const k=addDays(t,i-13),s=score(k)||0;
+    return `<div data-go="${k}" title="${k}: ${Math.round(s*100)}%"><div class="b ${s?'':'zero'}" style="height:${Math.max(s*100,3)}%"></div><span>${parse(k).getDate()}</span></div>`;
+  }).join('');
+  $('#heat').innerHTML=Array.from({length:35},(_,i)=>{
+    const k=addDays(t,i-34),s=score(k);
+    const l=s===null||s===0?'':s>=1?'l4':s>=WIN?'l3':s>=0.5?'l2':'l1';
+    return `<div class="${l} ${k===sel?'sel':''}" data-go="${k}" title="${k}: ${s===null?'no data':Math.round(s*100)+'%'}"></div>`;
+  }).join('');
+}
+
+/* events */
+document.addEventListener('click',e=>{
+  const del=e.target.closest('[data-del]');
+  if(del){
+    e.stopPropagation();
+    const t=S.tasks.find(x=>x.id===del.dataset.del);
+    if(t&&confirm(`Delete "${t.name}"? It will be removed from all days.`)){
+      S.tasks=S.tasks.filter(x=>x.id!==t.id);save();render();
+    }
+    return;
+  }
+  const b=e.target.closest('[data-bump]');
+  if(b){bump(b.dataset.bump,Number(b.dataset.dir));return}
+  const tg=e.target.closest('[data-toggle]');
+  if(tg&&!managing){toggle(tg.dataset.toggle);return}
+  const go=e.target.closest('[data-go]');
+  if(go){sel=go.dataset.go;render();window.scrollTo({top:0,behavior:'smooth'})}
+});
+$('#prev').onclick=()=>{sel=addDays(sel,-1);render()};
+$('#next').onclick=()=>{if(sel<todayKey()){sel=addDays(sel,1);render()}};
+$('#todayBtn').onclick=()=>{sel=todayKey();render()};
+$('#nextQuote').onclick=()=>{qi=(qi+1)%QUOTES.length;$('#quoteText').textContent=QUOTES[qi]};
+setInterval(()=>{qi=(qi+1)%QUOTES.length;$('#quoteText').textContent=QUOTES[qi]},14000);
+$('#manageBtn').onclick=()=>{managing=!managing;$('#manageBtn').textContent=managing?'Done editing':'Edit list';renderTasks()};
+
+const dlg=$('#dlg');
+$('#addBtn').onclick=()=>{$('#form').reset();$('#countFields').style.display='none';dlg.showModal()};
+$('#cancel').onclick=()=>dlg.close();
+$('#fType').onchange=e=>{$('#countFields').style.display=e.target.value==='count'?'flex':'none'};
+$('#form').onsubmit=e=>{
+  const name=$('#fName').value.trim();if(!name)return;
+  const type=$('#fType').value;
+  const t={id:'t'+Date.now().toString(36),name,emoji:$('#fEmoji').value.trim()||'🔥',type,added:sel};
+  if(type==='count'){
+    t.target=Math.max(0.1,parseFloat($('#fTarget').value)||1);
+    t.unit=$('#fUnit').value.trim()||'units';
+    t.step=Math.max(0.05,parseFloat($('#fStep').value)||1);
+  }
+  S.tasks.push(t);save();render();toast('Mission added');
+};
+
+$('#why').value=S.why||'';
+$('#why').oninput=e=>{S.why=e.target.value;save()};
+
+$('#export').onclick=()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download=`iron-daily-backup-${todayKey()}.json`;a.click();
+};
+$('#import').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const o=JSON.parse(r.result);
+      if(!o.tasks||!o.days)throw 0;
+      S=o;save();$('#why').value=S.why||'';render();toast('Backup restored');
+    }catch(_){toast('That file is not a valid backup')}
+  };
+  r.readAsText(f);e.target.value='';
+};
+$('#reset').onclick=()=>{
+  if(confirm('This deletes ALL your history and tasks. Sure?')){
+    S={tasks:DEFAULT_TASKS.map(t=>({...t})),days:{},why:''};save();$('#why').value='';render();toast('Fresh start');
+  }
+};
+
+render();
+</script>
+</body>
+</html>
